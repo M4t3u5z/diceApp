@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import android.util.Patterns
 import androidx.compose.ui.Alignment
+import com.example.rollerapp.R
 
 
 @Composable

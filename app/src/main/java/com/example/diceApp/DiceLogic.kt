@@ -1,6 +1,6 @@
 package com.example.diceApp
 
-class RollerLogic {
+class DiceLogic {
     var sameRollCount = 0
         private set
 

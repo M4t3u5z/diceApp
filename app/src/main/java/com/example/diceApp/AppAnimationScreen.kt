@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import com.example.rollerapp.R
 import kotlinx.coroutines.delay
 
 @Composable

@@ -9,6 +9,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import com.example.rollerapp.R
 
 @Composable
 fun DiceAnimationScreen(diceValue1: Int, diceValue2: Int? = null) {

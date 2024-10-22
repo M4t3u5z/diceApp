@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
-    val rollerLogic = remember { RollerLogic() }
+    val diceLogic = remember { DiceLogic() }
 
     var diceRoll1 by remember { mutableStateOf(1) }
     var diceRoll2 by remember { mutableStateOf(1) }
@@ -30,9 +30,9 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
         coroutineScope.launch {
             animateDiceRoll {
                 if (isOneDieGame) {
-                    diceRoll1 = rollerLogic.rollOneDie()
+                    diceRoll1 = diceLogic.rollOneDie()
                 } else {
-                    val (roll1, roll2) = rollerLogic.rollTwoDice()
+                    val (roll1, roll2) = diceLogic.rollTwoDice()
                     diceRoll1 = roll1
                     diceRoll2 = roll2
                 }
