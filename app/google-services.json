@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "136491853151",
+    "project_id": "rollerapp-68c7d",
+    "storage_bucket": "rollerapp-68c7d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136491853151:android:4ca2321ecf519f473702ea",
+        "android_client_info": {
+          "package_name": "com.example.rollerapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2hA5aO6Ue3XHJWKsnQdnJ5c2I5TE2STI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
