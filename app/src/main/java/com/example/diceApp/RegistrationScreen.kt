@@ -1,56 +1,58 @@
-package com.example.rollerapp
+package com.example.diceApp
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import android.util.Patterns
-import androidx.compose.ui.Alignment
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun RegistrationScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val auth = FirebaseAuth.getInstance()
+    val scrollState = rememberScrollState()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
 
+    // Przesunięcie o 1 cm (10 dp) do góry za pomocą Modifier.offset
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .offset(y = (-40).dp) // Przenosi widok o 1 cm do góry
+            .verticalScroll(scrollState)
+            .imePadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp)) // Dodaj trochę odstępu nad logo
+        Spacer(modifier = Modifier.height(64.dp))
 
-        // Logo
         Image(
             painter = painterResource(id = R.drawable.roller),
             contentDescription = "Roller Logo",
             modifier = Modifier
                 .size(200.dp)
-                .offset(y = (-20).dp)
                 .padding(bottom = 16.dp)
         )
 
@@ -59,18 +61,9 @@ fun LoginScreen(navController: NavController) {
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester),
-            isError = email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(email).matches(),
-            singleLine = true,  // Wyłącza dodawanie nowej linii
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next // Enter przejdzie do następnego pola
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusRequester.requestFocus() } // Przeniesienie do pola hasła
-            )
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            isError = email.isBlank()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -82,40 +75,37 @@ fun LoginScreen(navController: NavController) {
             label = { Text("Password") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,  // Wyłącza dodawanie nowej linii
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done // Enter wykonuje akcję zatwierdzenia (Done)
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    keyboardController?.hide() // Ukryj klawiaturę
-                    if (email.isNotBlank() && password.isNotBlank()) {
-                        // Logowanie po wciśnięciu Enter (Done)
-                        auth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    navController.navigate("diceSetSelection") // Zamiast roller
-                                } else {
-                                    errorMessage = task.exception?.message ?: "Login failed."
-                                }
-                            }
-                    } else {
-                        errorMessage = "Please enter your email and password."
-                    }
-                }
-            ),
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
                 }
-            }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isError = password.isBlank()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Wyświetlanie komunikatu błędu (jeśli wystąpi)
+        // Pole potwierdzenie hasła z możliwością podglądu
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password") },
+            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    Icon(imageVector = image, contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password")
+                }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isError = confirmPassword.isBlank()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
@@ -125,39 +115,44 @@ fun LoginScreen(navController: NavController) {
             )
         }
 
-        // Przycisk logowania
         Button(
             onClick = {
-                keyboardController?.hide() // Ukryj klawiaturę po kliknięciu przycisku logowania
+                keyboardController?.hide()
                 if (email.isBlank()) {
-                    errorMessage = "Please enter a valid email."
+                    errorMessage = "Please enter an email."
                 } else if (password.isBlank()) {
                     errorMessage = "Please enter a password."
+                } else if (password != confirmPassword) {
+                    errorMessage = "Passwords do not match."
                 } else {
-                    auth.signInWithEmailAndPassword(email, password)
+                    auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                navController.navigate("diceSetSelection") // Zamiast roller
+                                navController.navigate("login")
                             } else {
-                                errorMessage = task.exception?.message ?: "Login failed."
+                                val exception = task.exception
+                                if (exception is FirebaseAuthUserCollisionException) {
+                                    errorMessage = "This email is already in use."
+                                } else {
+                                    errorMessage = exception?.message ?: "Registration failed."
+                                }
                             }
                         }
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Log In")
+            Text(text = "Register")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Przycisk do rejestracji
         TextButton(
             onClick = {
-                navController.navigate("registration")
+                navController.navigate("login")
             }
         ) {
-            Text(text = "Don't have an account? Register here")
+            Text(text = "Already have an account? Log in")
         }
     }
 }

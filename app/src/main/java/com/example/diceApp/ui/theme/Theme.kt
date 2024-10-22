@@ -1,4 +1,4 @@
-package com.example.rollerapp.ui.theme
+package com.example.diceApp.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*

@@ -1,4 +1,4 @@
-package com.example.rollerapp
+package com.example.diceApp
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image

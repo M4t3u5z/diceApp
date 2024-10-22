@@ -1,4 +1,4 @@
-package com.example.rollerapp
+package com.example.diceApp
 
 import org.junit.Test
 

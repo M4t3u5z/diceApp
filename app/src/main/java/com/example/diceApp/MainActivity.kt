@@ -1,4 +1,4 @@
-package com.example.rollerapp
+package com.example.diceApp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.rollerapp.ui.theme.RollerAppTheme
+import com.example.diceApp.ui.theme.RollerAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

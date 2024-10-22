@@ -1,4 +1,4 @@
-package com.example.rollerapp
+package com.example.diceApp
 
 class RollerLogic {
     var sameRollCount = 0

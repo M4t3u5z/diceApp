@@ -1,4 +1,4 @@
-package com.example.rollerapp
+package com.example.diceApp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
