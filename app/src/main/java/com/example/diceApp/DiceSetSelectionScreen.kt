@@ -15,7 +15,7 @@ import com.example.rollerapp.R
 
 @Composable
 fun DiceSetSelectionScreen(navController: NavController) {
-    var isOneDieSelected by remember { mutableStateOf(true) }
+    var isOneDiceSelected by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -39,8 +39,8 @@ fun DiceSetSelectionScreen(navController: NavController) {
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = "Jedna Kostka", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
             Checkbox(
-                checked = isOneDieSelected,
-                onCheckedChange = { isOneDieSelected = true }
+                checked = isOneDiceSelected,
+                onCheckedChange = { isOneDiceSelected = true }
             )
         }
 
@@ -62,8 +62,8 @@ fun DiceSetSelectionScreen(navController: NavController) {
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = "Dwie Kostki", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
             Checkbox(
-                checked = !isOneDieSelected,
-                onCheckedChange = { isOneDieSelected = false }
+                checked = !isOneDiceSelected,
+                onCheckedChange = { isOneDiceSelected = false }
             )
         }
 
@@ -73,7 +73,7 @@ fun DiceSetSelectionScreen(navController: NavController) {
         Button(
             onClick = {
                 // Przekazanie wybranego trybu gry do ekranu gry
-                navController.navigate("roller/${isOneDieSelected}")
+                navController.navigate("roller/${isOneDiceSelected}")
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -43,7 +43,7 @@ fun LoginScreen(navController: NavController) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp)) // Dodaj trochę odstępu nad logo
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Logo
         Image(

@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,56 +18,38 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val diceLogic = DiceLogic()
+
         val auth = FirebaseAuth.getInstance()
 
         setContent {
-            RollerAppTheme(
-                darkTheme = false
-            ) {
-                MyApp(auth)
+            RollerAppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MyApp(auth, diceLogic)
+                }
             }
         }
     }
 }
 
 @Composable
-fun MyApp(auth: FirebaseAuth) {
-    // Zarządzanie nawigacją między ekranami
+fun MyApp(auth: FirebaseAuth, diceLogic: DiceLogic) {
     val navController = rememberNavController()
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        // Definicja nawigacji pomiędzy różnymi ekranami
-        NavHost(
-            navController = navController,
-            startDestination = if (auth.currentUser != null) "diceSetSelection" else "login"
-        ) {
-            composable("login") { LoginScreen(navController) }  // Ekran logowania
-            composable("registration") { RegistrationScreen(navController) }  // Ekran rejestracji
-            composable("diceSetSelection") { DiceSetSelectionScreen(navController) }  // Ekran wyboru trybu gry po zalogowaniu
 
-            // Ekran gry z parametrem isOneDiceGame
-            composable("roller/{isOneDiceGame}") { backStackEntry ->
-                val isOneDieGame = backStackEntry.arguments?.getString("isOneDiceGame")?.toBoolean() ?: true
-                RollerScreen(navController = navController, isOneDiceGame = isOneDieGame)
-            }
-
-            composable("animation") { AppAnimationScreen(navController) }  // Ekran animacji na starcie
-
-            // Dodajemy ekran profilu
-            composable("profile") { ProfileScreen(navController) }
-
-            // Dodajemy ekran rankingu globalnego
-            composable("ranking") { RankingScreen(navController) }
+    NavHost(navController = navController, startDestination = if (auth.currentUser != null) "diceSetSelection" else "login") {
+        composable("login") { LoginScreen(navController) }
+        composable("registration") { RegistrationScreen(navController) }
+        composable("diceSetSelection") { DiceSetSelectionScreen(navController) }
+        composable("roller/{isOneDieGame}") { backStackEntry ->
+            val isOneDieGame = backStackEntry.arguments?.getString("isOneDieGame")?.toBoolean() ?: true
+            DiceScreen(navController = navController, isOneDiceGame = isOneDieGame, diceLogic = diceLogic)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    RollerAppTheme {
-        MyApp(auth = FirebaseAuth.getInstance())
+        composable("animation") { AppAnimationScreen(navController) }
+        composable("profile") { ProfileScreen(navController = navController, diceLogic = diceLogic) }
+        composable("ranking") { RankingScreen(navController = navController) }
     }
 }

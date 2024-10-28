@@ -19,12 +19,12 @@ data class UserScore(val username: String = "", val score: Int = 0)
 
 @Composable
 fun RankingScreen(navController: NavController) {
-    var oneDieScores by remember { mutableStateOf(listOf<UserScore>()) }
-    var twoDieScores by remember { mutableStateOf(listOf<UserScore>()) }
+    var oneDiceScores by remember { mutableStateOf(listOf<UserScore>()) }
+    var twoDiceScores by remember { mutableStateOf(listOf<UserScore>()) }
 
     // Pobieranie danych dla jednej kostki z Firebase
-    val databaseOneDie = FirebaseDatabase.getInstance().getReference("one_die_leaderboard")
-    val oneDieListener = object : ValueEventListener {
+    val databaseOneDice = FirebaseDatabase.getInstance().getReference("one_die_leaderboard")
+    val oneDiceListener = object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             val scores = mutableListOf<UserScore>()
             for (userSnapshot in snapshot.children) {
@@ -32,7 +32,7 @@ fun RankingScreen(navController: NavController) {
                 val score = userSnapshot.child("score").getValue(Int::class.java) ?: 0
                 scores.add(UserScore(username, score))
             }
-            oneDieScores = scores.sortedByDescending { it.score }
+            oneDiceScores = scores.sortedByDescending { it.score }
         }
 
         override fun onCancelled(error: DatabaseError) {
@@ -42,7 +42,7 @@ fun RankingScreen(navController: NavController) {
 
     // Pobieranie danych dla dwóch kostek z Firebase
     val databaseTwoDice = FirebaseDatabase.getInstance().getReference("two_dice_leaderboard")
-    val twoDieListener = object : ValueEventListener {
+    val twoDiceListener = object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             val scores = mutableListOf<UserScore>()
             for (userSnapshot in snapshot.children) {
@@ -50,7 +50,7 @@ fun RankingScreen(navController: NavController) {
                 val score = userSnapshot.child("score").getValue(Int::class.java) ?: 0
                 scores.add(UserScore(username, score))
             }
-            twoDieScores = scores.sortedByDescending { it.score }
+            twoDiceScores = scores.sortedByDescending { it.score }
         }
 
         override fun onCancelled(error: DatabaseError) {
@@ -59,8 +59,8 @@ fun RankingScreen(navController: NavController) {
     }
 
     LaunchedEffect(Unit) {
-        databaseOneDie.addValueEventListener(oneDieListener)
-        databaseTwoDice.addValueEventListener(twoDieListener)
+        databaseOneDice.addValueEventListener(oneDiceListener)
+        databaseTwoDice.addValueEventListener(twoDiceListener)
     }
 
     Column(
@@ -99,7 +99,7 @@ fun RankingScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 LazyColumn {
-                    items(oneDieScores) { userScore ->
+                    items(oneDiceScores) { userScore ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -127,7 +127,7 @@ fun RankingScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 LazyColumn {
-                    items(twoDieScores) { userScore ->
+                    items(twoDiceScores) { userScore ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
