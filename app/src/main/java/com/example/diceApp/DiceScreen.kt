@@ -11,7 +11,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
 @Composable
-fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
+fun RollerScreen(navController: NavController, isOneDiceGame: Boolean) {
     val diceLogic = remember { DiceLogic() }
     var diceRoll1 by remember { mutableStateOf(1) }
     var diceRoll2 by remember { mutableStateOf(1) }
@@ -27,7 +27,7 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
         isRolling = true
         coroutineScope.launch {
             animateDiceRoll {
-                if (isOneDieGame) {
+                if (isOneDiceGame) {
                     diceRoll1 = diceLogic.rollOneDice()
                 } else {
                     val (roll1, roll2) = diceLogic.rollTwoDice()
@@ -35,7 +35,7 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
                     diceRoll2 = roll2
                 }
             }
-            if (isOneDieGame) {
+            if (isOneDiceGame) {
                 rollResults = rollResults + diceRoll1.toString()
             } else {
                 rollResults = rollResults + "$diceRoll1:$diceRoll2"
@@ -46,7 +46,7 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
     }
 
     fun saveAndExit() {
-        diceLogic.saveUserScore(rollResults, isOneDieGame) // Zapisuje wynik do odpowiedniego leaderboardu
+        diceLogic.saveUserScore(rollResults, isOneDiceGame) // Zapisuje wynik do odpowiedniego leaderboardu
         rollCount = 0
         duplicateCount = 0
         rollResults = listOf()
@@ -61,15 +61,15 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (!isOneDieGame) {
-            Text(text = "Duplicate values count: $duplicateCount")
+        if (!isOneDiceGame) {
+            Text(text = "Ilość duplikujących się kostek: $duplicateCount")
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Text(text = "Roll count: $rollCount")
+        Text(text = "Ilość rzutów: $rollCount")
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (isOneDieGame) {
+        if (isOneDiceGame) {
             DiceAnimationScreen(diceValue1 = diceRoll1)
         } else {
             DiceAnimationScreen(diceValue1 = diceRoll1, diceValue2 = diceRoll2)
@@ -91,12 +91,12 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
             onClick = { saveAndExit() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Back to Game Mode Selection")
+            Text(text = "Wróć do wyboru gry")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Roll results: ${rollResults.joinToString(", ")}")
+        Text(text = "Wyniki rzutów: ${rollResults.joinToString(", ")}")
     }
 }
 

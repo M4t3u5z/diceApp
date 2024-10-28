@@ -25,10 +25,10 @@ class DiceLogic {
     }
 
     // Funkcja obliczająca sumę wyników z rollResults
-    fun calculateTotalScore(rollResults: List<String>, isOneDieGame: Boolean): Int {
+    fun calculateTotalScore(rollResults: List<String>, isOneDiceGame: Boolean): Int {
         var totalScore = 0
         rollResults.forEach { result ->
-            if (isOneDieGame) {
+            if (isOneDiceGame) {
                 totalScore += result.toInt()  // Dodajemy wynik dla jednej kostki
             } else {
                 val rolls = result.split(":").map { it.toInt() }
@@ -39,15 +39,15 @@ class DiceLogic {
     }
 
     // Zapisywanie wyniku użytkownika do odpowiedniej kolumny w Firebase
-    fun saveUserScore(rollResults: List<String>, isOneDieGame: Boolean) {
-        val totalScore = calculateTotalScore(rollResults, isOneDieGame)
+    fun saveUserScore(rollResults: List<String>, isOneDiceGame: Boolean) {
+        val totalScore = calculateTotalScore(rollResults, isOneDiceGame)
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         if (user != null) {
             val userId = user.uid
-            val databaseRef = if (isOneDieGame) {
+            val databaseRef = if (isOneDiceGame) {
                 // Jeśli gracz gra jedną kostką, zapis do one_die_leaderboard
-                FirebaseDatabase.getInstance().getReference("one_die_leaderboard").child(userId)
+                FirebaseDatabase.getInstance().getReference("one_dice_leaderboard").child(userId)
             } else {
                 // Jeśli gracz gra dwiema kostkami, zapis do two_dice_leaderboard
                 FirebaseDatabase.getInstance().getReference("two_dice_leaderboard").child(userId)

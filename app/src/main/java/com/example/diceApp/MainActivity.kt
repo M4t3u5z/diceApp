@@ -48,10 +48,10 @@ fun MyApp(auth: FirebaseAuth) {
             composable("registration") { RegistrationScreen(navController) }  // Ekran rejestracji
             composable("diceSetSelection") { DiceSetSelectionScreen(navController) }  // Ekran wyboru trybu gry po zalogowaniu
 
-            // Ekran gry z parametrem isOneDieGame
-            composable("roller/{isOneDieGame}") { backStackEntry ->
-                val isOneDieGame = backStackEntry.arguments?.getString("isOneDieGame")?.toBoolean() ?: true
-                RollerScreen(navController = navController, isOneDieGame = isOneDieGame)
+            // Ekran gry z parametrem isOneDiceGame
+            composable("roller/{isOneDiceGame}") { backStackEntry ->
+                val isOneDieGame = backStackEntry.arguments?.getString("isOneDiceGame")?.toBoolean() ?: true
+                RollerScreen(navController = navController, isOneDiceGame = isOneDieGame)
             }
 
             composable("animation") { AppAnimationScreen(navController) }  // Ekran animacji na starcie

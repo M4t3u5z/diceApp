@@ -21,7 +21,7 @@ fun ProfileScreen(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
     var profileName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf(user?.email ?: "Nieznany") }
+    val email by remember { mutableStateOf(user?.email ?: "Nieznany") }
     var isEditing by remember { mutableStateOf(false) }
 
     // Pobieranie nazwy profilu z Firebase Database

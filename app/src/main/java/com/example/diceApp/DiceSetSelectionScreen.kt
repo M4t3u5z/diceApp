@@ -33,11 +33,11 @@ fun DiceSetSelectionScreen(navController: NavController) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.d1),
-                contentDescription = "One Die",
+                contentDescription = "One Dice",
                 modifier = Modifier.size(80.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "Play with one die", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
+            Text(text = "Jedna Kostka", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
             Checkbox(
                 checked = isOneDieSelected,
                 onCheckedChange = { isOneDieSelected = true }
@@ -60,7 +60,7 @@ fun DiceSetSelectionScreen(navController: NavController) {
                 modifier = Modifier.size(100.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "Play with two dice", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
+            Text(text = "Dwie Kostki", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
             Checkbox(
                 checked = !isOneDieSelected,
                 onCheckedChange = { isOneDieSelected = false }
