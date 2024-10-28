@@ -37,7 +37,7 @@ fun DiceSetSelectionScreen(navController: NavController) {
                 modifier = Modifier.size(80.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "Play with one dice", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
+            Text(text = "Play with one die", modifier = Modifier.weight(1f)) // Wyrównanie tekstu
             Checkbox(
                 checked = isOneDieSelected,
                 onCheckedChange = { isOneDieSelected = true }
@@ -78,6 +78,30 @@ fun DiceSetSelectionScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Graj")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Przycisk do nawigacji do profilu
+        Button(
+            onClick = {
+                navController.navigate("profile")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Profil")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Przycisk do nawigacji do rankingu
+        Button(
+            onClick = {
+                navController.navigate("ranking")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Tablica Wyników")
         }
     }
 }

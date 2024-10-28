@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services") // Firebase Google Services Plugin
 }
 
 android {
@@ -53,13 +53,14 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("androidx.compose.material:material-icons-extended:1.7.3")
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.compose.material:material-icons-extended:1.7.4")
 
     // Compose BOM - użyj najnowszej wersji BOM
     implementation(platform("androidx.compose:compose-bom:2024.01.00"))
-    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
 
+    // Firebase BOM - użyj najnowszej wersji Firebase BOM
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
 
     // Zależności Compose bez wersji, ponieważ BOM zarządza wersjami
     implementation("androidx.compose.ui:ui")
@@ -67,10 +68,14 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose")
-    implementation("androidx.navigation:navigation-runtime-ktx:2.8.2")
-    implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
-    implementation("com.google.firebase:firebase-auth:23.0.0")
-    implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.8.3")
+
+    // Firebase Auth i Firebase Realtime Database
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     // Testy jednostkowe
     testImplementation("junit:junit:4.13.2")

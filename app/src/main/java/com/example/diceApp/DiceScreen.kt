@@ -13,41 +13,45 @@ import kotlinx.coroutines.launch
 @Composable
 fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
     val diceLogic = remember { DiceLogic() }
-
     var diceRoll1 by remember { mutableStateOf(1) }
     var diceRoll2 by remember { mutableStateOf(1) }
     var isRolling by remember { mutableStateOf(false) }
-    var rollCount by remember { mutableStateOf(0) } // Licznik kliknięć "Roll the dice!"
-    var duplicateCount by remember { mutableStateOf(0) } // Licznik zduplikowanych wyników
+    var rollCount by remember { mutableStateOf(0) }
+    var duplicateCount by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Lista wyników rzutów, które będą wyświetlane w formacie normalnych liczb
     var rollResults by remember { mutableStateOf(listOf<String>()) }
 
     fun rollDice() {
-        rollCount++ // Liczymy kliknięcie przycisku przed rozpoczęciem animacji
+        rollCount++
         isRolling = true
         coroutineScope.launch {
             animateDiceRoll {
                 if (isOneDieGame) {
-                    diceRoll1 = diceLogic.rollOneDie()
+                    diceRoll1 = diceLogic.rollOneDice()
                 } else {
                     val (roll1, roll2) = diceLogic.rollTwoDice()
                     diceRoll1 = roll1
                     diceRoll2 = roll2
                 }
             }
-            // Po zakończeniu animacji zapisujemy wynik i zliczamy duplikaty
             if (isOneDieGame) {
-                rollResults = rollResults + diceRoll1.toString() // Dodajemy wynik rzutu do listy
+                rollResults = rollResults + diceRoll1.toString()
             } else {
-                rollResults = rollResults + "$diceRoll1:$diceRoll2" // Wyniki rzutów w formacie 1:1, 2:6, bez nawiasów
-                if (diceRoll1 == diceRoll2) {
-                    duplicateCount++ // Zwiększamy licznik zduplikowanych wyników po zakończeniu animacji
-                }
+                rollResults = rollResults + "$diceRoll1:$diceRoll2"
+                duplicateCount = diceLogic.sameRollCount
             }
             isRolling = false
         }
+    }
+
+    fun saveAndExit() {
+        diceLogic.saveUserScore(rollResults, isOneDieGame) // Zapisuje wynik do odpowiedniego leaderboardu
+        rollCount = 0
+        duplicateCount = 0
+        rollResults = listOf()
+        diceLogic.resetSameRollCount()
+        navController.navigate("diceSetSelection")
     }
 
     Column(
@@ -57,15 +61,12 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Licznik zduplikowanych wartości w trybie dwóch kostek
         if (!isOneDieGame) {
             Text(text = "Duplicate values count: $duplicateCount")
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Licznik kliknięć nad grafiką kostek
         Text(text = "Roll count: $rollCount")
-
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isOneDieGame) {
@@ -77,27 +78,17 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = {
-                if (!isRolling) {
-                    rollDice() // Kliknięcie przycisku liczone i rozpoczyna się animacja
-                }
-            },
+            onClick = { if (!isRolling) rollDice() },
             modifier = Modifier.fillMaxWidth(),
-            enabled = !isRolling // Przycisk dostępny po zakończeniu animacji
+            enabled = !isRolling
         ) {
             Text(text = if (isRolling) "Rolling..." else "Roll the dice!")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Przycisk powrotu do wyboru trybu gry
         Button(
-            onClick = {
-                rollCount = 0 // Resetujemy licznik przy wyjściu do wyboru trybu gry
-                duplicateCount = 0 // Resetujemy licznik zduplikowanych wyników
-                rollResults = listOf() // Resetujemy listę wyników
-                navController.navigate("diceSetSelection")
-            },
+            onClick = { saveAndExit() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Back to Game Mode Selection")
@@ -105,10 +96,7 @@ fun RollerScreen(navController: NavController, isOneDieGame: Boolean) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Pole wyświetlające wyniki rzutów kostek pod przyciskiem powrotu
-        Text(
-            text = "Roll results: ${rollResults.joinToString(", ")}", // Wyświetlenie wyników w formacie 1:1, 2:6
-            modifier = Modifier.padding(top = 16.dp)
-        )
+        Text(text = "Roll results: ${rollResults.joinToString(", ")}")
     }
 }
+
