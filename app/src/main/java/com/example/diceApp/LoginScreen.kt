@@ -1,30 +1,30 @@
 package com.example.diceApp
 
+import android.os.Bundle
+import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
-import android.util.Patterns
-import androidx.compose.ui.Alignment
 import com.example.rollerapp.R
-
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -35,6 +35,14 @@ fun LoginScreen(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+
+    // Inicjalizacja Firebase Analytics
+    val firebaseAnalytics = Firebase.analytics
+
+    // Logowanie wyświetlenia ekranu
+    firebaseAnalytics.logEvent("screen_view", Bundle().apply {
+        putString("screen_name", "Login")
+    })
 
     Column(
         modifier = Modifier
@@ -64,13 +72,13 @@ fun LoginScreen(navController: NavController) {
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
             isError = email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(email).matches(),
-            singleLine = true,  // Wyłącza dodawanie nowej linii
+            singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next // Enter przejdzie do następnego pola
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusRequester.requestFocus() } // Przeniesienie do pola hasła
+                onNext = { focusRequester.requestFocus() }
             )
         )
 
@@ -83,26 +91,16 @@ fun LoginScreen(navController: NavController) {
             label = { Text("Password") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,  // Wyłącza dodawanie nowej linii
+            singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done // Enter wykonuje akcję zatwierdzenia (Done)
+                imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    keyboardController?.hide() // Ukryj klawiaturę
-                    if (email.isNotBlank() && password.isNotBlank()) {
-                        // Logowanie po wciśnięciu Enter (Done)
-                        auth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    navController.navigate("diceSetSelection") // Zamiast roller
-                                } else {
-                                    errorMessage = task.exception?.message ?: "Login failed."
-                                }
-                            }
-                    } else {
-                        errorMessage = "Please enter your email and password."
+                    keyboardController?.hide()
+                    attemptLogin(auth, email, password, navController, firebaseAnalytics) { error ->
+                        errorMessage = error ?: ""
                     }
                 }
             ),
@@ -129,20 +127,9 @@ fun LoginScreen(navController: NavController) {
         // Przycisk logowania
         Button(
             onClick = {
-                keyboardController?.hide() // Ukryj klawiaturę po kliknięciu przycisku logowania
-                if (email.isBlank()) {
-                    errorMessage = "Please enter a valid email."
-                } else if (password.isBlank()) {
-                    errorMessage = "Please enter a password."
-                } else {
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                navController.navigate("diceSetSelection") // Zamiast roller
-                            } else {
-                                errorMessage = task.exception?.message ?: "Login failed."
-                            }
-                        }
+                keyboardController?.hide()
+                attemptLogin(auth, email, password, navController, firebaseAnalytics) { error ->
+                    errorMessage = error ?: ""
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -155,10 +142,47 @@ fun LoginScreen(navController: NavController) {
         // Przycisk do rejestracji
         TextButton(
             onClick = {
+                // Logowanie nawigacji do rejestracji
+                firebaseAnalytics.logEvent("navigate_to_registration", null)
                 navController.navigate("registration")
             }
         ) {
             Text(text = "Don't have an account? Register here")
         }
     }
+}
+
+// Funkcja pomocnicza do obsługi logowania użytkownika
+private fun attemptLogin(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    navController: NavController,
+    firebaseAnalytics: FirebaseAnalytics,
+    onError: (String?) -> Unit
+) {
+    if (email.isBlank() || password.isBlank()) {
+        onError("Please enter your email and password.")
+        return
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Logowanie zdarzenia pomyślnego logowania
+                firebaseAnalytics.logEvent("login_attempt", Bundle().apply {
+                    putString("status", "success")
+                    putString("method", "email_password")
+                })
+                navController.navigate("diceSetSelection")
+            } else {
+                // Logowanie zdarzenia nieudanego logowania
+                firebaseAnalytics.logEvent("login_attempt", Bundle().apply {
+                    putString("status", "failure")
+                    putString("method", "email_password")
+                    putString("error_message", task.exception?.message)
+                })
+                onError(task.exception?.message ?: "Login failed.")
+            }
+        }
 }

@@ -1,3 +1,6 @@
+package com.example.diceApp
+
+import android.os.Bundle
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,12 +16,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.database.*
+import com.google.firebase.ktx.Firebase
 
 data class UserScore(val username: String = "", val score: Int = 0)
 
 @Composable
 fun RankingScreen(navController: NavController) {
+    // Inicjalizacja Firebase Analytics
+    val firebaseAnalytics = Firebase.analytics
+
     var oneDiceScores by remember { mutableStateOf(listOf<UserScore>()) }
     var twoDiceScores by remember { mutableStateOf(listOf<UserScore>()) }
 
@@ -36,7 +44,10 @@ fun RankingScreen(navController: NavController) {
         }
 
         override fun onCancelled(error: DatabaseError) {
-            // Obsługa błędów
+            // Logowanie błędu podczas pobierania rankingu dla jednej kostki
+            firebaseAnalytics.logEvent("error_fetch_one_dice_scores", Bundle().apply {
+                putString("error_message", error.message)
+            })
         }
     }
 
@@ -54,11 +65,20 @@ fun RankingScreen(navController: NavController) {
         }
 
         override fun onCancelled(error: DatabaseError) {
-            // Obsługa błędów
+            // Logowanie błędu podczas pobierania rankingu dla dwóch kostek
+            firebaseAnalytics.logEvent("error_fetch_two_dice_scores", Bundle().apply {
+                putString("error_message", error.message)
+            })
         }
     }
 
+    // Logowanie zdarzenia przeglądania rankingu
     LaunchedEffect(Unit) {
+        firebaseAnalytics.logEvent("screen_view", Bundle().apply {
+            putString("screen_name", "Ranking")
+        })
+        firebaseAnalytics.logEvent("viewed_ranking", null)
+
         databaseOneDice.addValueEventListener(oneDiceListener)
         databaseTwoDice.addValueEventListener(twoDiceListener)
     }
@@ -93,7 +113,7 @@ fun RankingScreen(navController: NavController) {
             ) {
                 Text(
                     text = "Jedna kostka",
-                    fontSize = 12.sp,  // Zmniejszenie rozmiaru tekstu
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -121,7 +141,7 @@ fun RankingScreen(navController: NavController) {
             ) {
                 Text(
                     text = "Dwie kostki",
-                    fontSize = 12.sp,  // Zmniejszenie rozmiaru tekstu
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -144,6 +164,8 @@ fun RankingScreen(navController: NavController) {
         // Przycisk powrotu do ekranu wyboru gry
         Button(
             onClick = {
+                // Logowanie zdarzenia powrotu do wyboru gry
+                firebaseAnalytics.logEvent("exit_ranking_screen", null)
                 navController.navigate("diceSetSelection")
             },
             modifier = Modifier

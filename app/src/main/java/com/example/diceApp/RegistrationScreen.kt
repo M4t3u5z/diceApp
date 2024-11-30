@@ -1,5 +1,6 @@
 package com.example.diceApp
 
+import android.os.Bundle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,9 +21,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rollerapp.R
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun RegistrationScreen(navController: NavController) {
@@ -36,12 +38,21 @@ fun RegistrationScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Przesunięcie o 1 cm (10 dp) do góry za pomocą Modifier.offset
+    // Inicjalizacja Firebase Analytics
+    val firebaseAnalytics = Firebase.analytics
+
+    // Logowanie wyświetlenia ekranu rejestracji
+    LaunchedEffect(Unit) {
+        firebaseAnalytics.logEvent("screen_view", Bundle().apply {
+            putString("screen_name", "Registration")
+        })
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .offset(y = (-40).dp) // Przenosi widok o 1 cm do góry
+            .offset(y = (-40).dp)
             .verticalScroll(scrollState)
             .imePadding(),
         verticalArrangement = Arrangement.Top,
@@ -119,6 +130,12 @@ fun RegistrationScreen(navController: NavController) {
         Button(
             onClick = {
                 keyboardController?.hide()
+
+                // Logowanie rozpoczęcia procesu rejestracji
+                firebaseAnalytics.logEvent("registration_attempt", Bundle().apply {
+                    putString("email", email)
+                })
+
                 if (email.isBlank()) {
                     errorMessage = "Please enter an email."
                 } else if (password.isBlank()) {
@@ -129,13 +146,23 @@ fun RegistrationScreen(navController: NavController) {
                     auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+                                // Logowanie pomyślnego zakończenia rejestracji
+                                firebaseAnalytics.logEvent("registration_success", Bundle().apply {
+                                    putString("email", email)
+                                })
                                 navController.navigate("login")
                             } else {
                                 val exception = task.exception
                                 if (exception is FirebaseAuthUserCollisionException) {
                                     errorMessage = "This email is already in use."
+                                    firebaseAnalytics.logEvent("registration_error", Bundle().apply {
+                                        putString("error", "Email already in use")
+                                    })
                                 } else {
                                     errorMessage = exception?.message ?: "Registration failed."
+                                    firebaseAnalytics.logEvent("registration_error", Bundle().apply {
+                                        putString("error", exception?.message)
+                                    })
                                 }
                             }
                         }

@@ -1,5 +1,6 @@
 package com.example.diceApp
 
+import android.os.Bundle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -10,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 @Composable
@@ -23,9 +27,26 @@ fun DiceScreen(navController: NavController, isOneDiceGame: Boolean, diceLogic: 
 
     var rollResults by remember { mutableStateOf(listOf<String>()) }
 
+    // Inicjalizacja Firebase Analytics
+    val firebaseAnalytics = Firebase.analytics
+
+    // Funkcja pomocnicza do logowania zdarzeń
+    fun logEvent(eventName: String, params: Bundle? = null) {
+        firebaseAnalytics.logEvent(eventName, params)
+    }
+
+    // Logowanie otwarcia ekranu gry
+    logEvent("screen_view", Bundle().apply {
+        putString("screen_name", if (isOneDiceGame) "OneDiceGame" else "TwoDiceGame")
+    })
+
     fun rollDice() {
         rollCount++  // Zwiększamy licznik kliknięć
         isRolling = true  // Blokujemy możliwość rzutu kostką podczas animacji
+
+        // Logowanie zdarzenia kliknięcia przycisku
+        logEvent("roll_button_clicked")
+
         coroutineScope.launch {
             animateDiceRoll {
                 if (isOneDiceGame) {
@@ -40,10 +61,27 @@ fun DiceScreen(navController: NavController, isOneDiceGame: Boolean, diceLogic: 
             // Zapisujemy wynik dopiero po zakończeniu animacji
             if (isOneDiceGame) {
                 rollResults = rollResults + diceRoll1.toString()  // Wynik dla jednej kostki
+
+                // Logowanie wyniku dla jednej kostki
+                logEvent("dice_roll", Bundle().apply {
+                    putInt("dice_value", diceRoll1)
+                })
             } else {
                 rollResults = rollResults + "$diceRoll1:$diceRoll2"  // Wyniki dla dwóch kostek
+
+                // Logowanie wyników dla dwóch kostek
+                logEvent("dice_roll", Bundle().apply {
+                    putInt("dice_value_1", diceRoll1)
+                    putInt("dice_value_2", diceRoll2)
+                })
+
                 if (diceRoll1 == diceRoll2) {
                     duplicateCount++  // Zwiększamy licznik powtórzeń
+
+                    // Logowanie zdarzenia powtórzenia wyników
+                    logEvent("duplicate_roll", Bundle().apply {
+                        putInt("duplicate_value", diceRoll1)
+                    })
                 }
             }
 
@@ -54,6 +92,13 @@ fun DiceScreen(navController: NavController, isOneDiceGame: Boolean, diceLogic: 
 
     fun saveAndExit() {
         diceLogic.saveUserScore(rollResults, isOneDiceGame)  // Zapisujemy wynik do odpowiedniego leaderboarda
+
+        // Logowanie zdarzenia wyjścia z ekranu gry
+        logEvent("exit_game_screen", Bundle().apply {
+            putInt("total_rolls", rollCount)
+            putInt("duplicates_count", duplicateCount)
+        })
+
         rollCount = 0  // Resetujemy licznik rzutów
         duplicateCount = 0  // Resetujemy licznik powtórzeń
         rollResults = listOf()  // Czyścimy wyniki rzutów

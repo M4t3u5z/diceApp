@@ -1,5 +1,6 @@
 package com.example.diceApp
 
+import android.os.Bundle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -12,10 +13,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rollerapp.R
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun DiceSetSelectionScreen(navController: NavController) {
     var isOneDiceSelected by remember { mutableStateOf(true) }
+
+    // Inicjalizacja Firebase Analytics
+    val firebaseAnalytics = Firebase.analytics
+
+    // Funkcja pomocnicza do logowania zdarzeń
+    fun logEvent(eventName: String, params: Bundle? = null) {
+        firebaseAnalytics.logEvent(eventName, params)
+    }
+
+    // Logowanie wyświetlenia ekranu
+    logEvent("screen_view", Bundle().apply {
+        putString("screen_name", "DiceSetSelection")
+    })
 
     Column(
         modifier = Modifier
@@ -72,6 +88,11 @@ fun DiceSetSelectionScreen(navController: NavController) {
         // Przycisk do zatwierdzenia trybu gry
         Button(
             onClick = {
+                // Logowanie wybranego trybu gry
+                logEvent("game_mode_selected", Bundle().apply {
+                    putString("mode", if (isOneDiceSelected) "one_die" else "two_dice")
+                })
+
                 // Przekazanie wybranego trybu gry do ekranu gry
                 navController.navigate("roller/${isOneDiceSelected}")
             },
@@ -85,6 +106,7 @@ fun DiceSetSelectionScreen(navController: NavController) {
         // Przycisk do nawigacji do profilu
         Button(
             onClick = {
+                logEvent("navigate_to_profile")
                 navController.navigate("profile")
             },
             modifier = Modifier.fillMaxWidth()
@@ -97,6 +119,7 @@ fun DiceSetSelectionScreen(navController: NavController) {
         // Przycisk do nawigacji do rankingu
         Button(
             onClick = {
+                logEvent("navigate_to_ranking")
                 navController.navigate("ranking")
             },
             modifier = Modifier.fillMaxWidth()
